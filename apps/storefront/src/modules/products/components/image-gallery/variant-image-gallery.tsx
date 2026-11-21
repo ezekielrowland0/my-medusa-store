@@ -21,7 +21,17 @@ const getImagesForVariant = (
 
   if (variant.images?.length) {
     const imageIdsMap = new Map(variant.images!.map((i) => [i.id, true]))
-    return product.images?.filter((i) => imageIdsMap.has(i.id)) ?? null
+    const selected = product.images?.filter((i) => imageIdsMap.has(i.id)) ?? []
+    // The seed links every image to every variant, so a variant's own
+    // images are usually the whole set and carry no colour information.
+    // Only trust them when they actually narrow the set down; otherwise
+    // fall through to the colour-in-filename match below.
+    if (
+      selected.length > 0 &&
+      selected.length < (product.images?.length ?? 0)
+    ) {
+      return selected
+    }
   }
 
   // No images are linked to any variant in the seed data, so the variant's

@@ -94,6 +94,10 @@ const ImageGallery = ({ images, videoUrl }: ImageGalleryProps) => {
 
   const viewerRef = useRef<HTMLDivElement>(null)
   const isTouchDevice = useRef(false)
+  // Hover zoom only starts after the mouse has rested on the photo for a
+  // moment, so moving the mouse across the photo does not instantly zoom
+  // it and hide the full picture.
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const touchState = useRef({
     startX: 0,
     startY: 0,
@@ -269,10 +273,19 @@ const ImageGallery = ({ images, videoUrl }: ImageGalleryProps) => {
       x: ((event.clientX - rect.left) / rect.width) * 100,
       y: ((event.clientY - rect.top) / rect.height) * 100,
     })
-    setHoverZoom(true)
+    if (!hoverZoom) {
+      if (hoverTimer.current) {
+        clearTimeout(hoverTimer.current)
+      }
+      hoverTimer.current = setTimeout(() => setHoverZoom(true), 350)
+    }
   }
 
   const handleMouseLeave = () => {
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current)
+      hoverTimer.current = null
+    }
     setHoverZoom(false)
     setOrigin({ x: 50, y: 50 })
   }
