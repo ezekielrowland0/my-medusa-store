@@ -3,6 +3,7 @@ import Image from "next/image"
 import React from "react"
 
 import PlaceholderImage from "@modules/common/icons/placeholder-image"
+import { displayImageUrl } from "@lib/util/product-image-colour"
 
 type ThumbnailProps = {
   thumbnail?: string | null
@@ -23,7 +24,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   alt = "",
   "data-testid": dataTestid,
 }) => {
-  const initialImage = thumbnail || images?.[0]?.url
+  const initialImage = displayImageUrl(thumbnail || images?.[0]?.url)
 
   return (
     <Container

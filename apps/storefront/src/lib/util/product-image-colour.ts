@@ -73,3 +73,26 @@ export const colourHexFromImageFilenames = (
 
   return "#1C1A17"
 }
+
+/**
+ * The white T-Shirt photos were shot on a near-white background
+ * (RGB 247,247,250), so the white shirt washes out and is barely visible.
+ * These are the same two photos with only the backdrop changed to the
+ * shop's stone — the garment itself is untouched — served from the
+ * storefront's own public folder, so nothing in the backend has to change.
+ * Any other URL passes through unchanged, so if the hosted photos ever
+ * move, the shop simply shows the originals again.
+ */
+const STONE_BACKDROP_IMAGES: Record<string, string> = {
+  "tee-white-front.png": "/products/tee-white-front-stone.png",
+  "tee-white-back.png": "/products/tee-white-back-stone.png",
+}
+
+export const displayImageUrl = (url?: string | null): string | undefined => {
+  if (!url) {
+    return undefined
+  }
+
+  const filename = url.split("/").pop()?.split("?")[0] ?? ""
+  return STONE_BACKDROP_IMAGES[filename] ?? url
+}

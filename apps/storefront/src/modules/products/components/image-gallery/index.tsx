@@ -4,6 +4,7 @@ import { HttpTypes } from "@medusajs/types"
 import { clx } from "@modules/common/components/ui"
 import Image from "next/image"
 import { useRef, useState } from "react"
+import { displayImageUrl } from "@lib/util/product-image-colour"
 
 const MAX_IMAGES = 6
 const MAX_ZOOM = 3
@@ -30,7 +31,7 @@ const buildItems = (
     .map((image, index) => ({
       kind: "image" as const,
       id: image.id,
-      url: image.url as string,
+      url: displayImageUrl(image.url) as string,
       alt: `Product image ${index + 1}`,
     }))
 
