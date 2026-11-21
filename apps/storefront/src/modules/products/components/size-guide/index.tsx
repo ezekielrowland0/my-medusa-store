@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react"
 
+import { HttpTypes } from "@medusajs/types"
 import {
-  HOW_TO_MEASURE,
-  SIZE_CHART,
+  MEASURE_STEPS,
   getFitNote,
+  getSizeChart,
 } from "@modules/products/components/size-guide/size-chart"
 
 type SizeGuideProps = {
-  /** First category of the product, used to pick the fit note. */
-  categoryName?: string | null
+  /** The product, used to pick the right chart (tops or bottoms) and the fit note. */
+  product: HttpTypes.StoreProduct
 }
 
 /** One measurement cell: inches on top, centimetres below. */
@@ -31,8 +32,10 @@ const MeasureCell = ({ inches, cm }: { inches: string; cm: string }) => (
  * (inches and centimetres), how to measure at home, and a fit note for
  * the product's category.
  */
-const SizeGuide = ({ categoryName }: SizeGuideProps) => {
+const SizeGuide = ({ product }: SizeGuideProps) => {
   const [isOpen, setIsOpen] = useState(false)
+  const categoryName = product.categories?.[0]?.name
+  const chart = getSizeChart(product)
 
   // Lock the page behind the modal, and let Escape close it.
   useEffect(() => {
@@ -110,39 +113,33 @@ const SizeGuide = ({ categoryName }: SizeGuideProps) => {
                       <th className="px-2 py-3 text-left text-xs uppercase tracking-[0.15em] text-ink/60 font-normal">
                         Size
                       </th>
-                      <th className="px-2 py-3 text-center text-xs uppercase tracking-[0.15em] text-ink/60 font-normal">
-                        Chest
-                      </th>
-                      <th className="px-2 py-3 text-center text-xs uppercase tracking-[0.15em] text-ink/60 font-normal">
-                        Waist
-                      </th>
-                      <th className="px-2 py-3 text-center text-xs uppercase tracking-[0.15em] text-ink/60 font-normal">
-                        Hip
-                      </th>
-                      <th className="px-2 py-3 text-center text-xs uppercase tracking-[0.15em] text-ink/60 font-normal">
-                        Height
-                      </th>
+                      {chart.columns.map((column) => (
+                        <th
+                          key={column.key}
+                          className="px-2 py-3 text-center text-xs uppercase tracking-[0.15em] text-ink/60 font-normal"
+                        >
+                          {column.label}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {SIZE_CHART.map((row) => (
+                    {chart.rows.map((row) => (
                       <tr key={row.size} className="border-b border-stone">
                         <td className="px-2 py-3 font-display text-lg text-ink">
                           {row.size}
                         </td>
-                        <MeasureCell
-                          inches={row.chestIn}
-                          cm={row.chestCm}
-                        />
-                        <MeasureCell
-                          inches={row.waistIn}
-                          cm={row.waistCm}
-                        />
-                        <MeasureCell inches={row.hipIn} cm={row.hipCm} />
-                        <MeasureCell
-                          inches={row.heightIn}
-                          cm={row.heightCm}
-                        />
+                        {chart.columns.map((column) => {
+                          const cell = row.cells[column.key]
+
+                          return cell ? (
+                            <MeasureCell
+                              key={column.key}
+                              inches={cell.inches}
+                              cm={cell.cm}
+                            />
+                          ) : null
+                        })}
                       </tr>
                     ))}
                   </tbody>
@@ -158,17 +155,21 @@ const SizeGuide = ({ categoryName }: SizeGuideProps) => {
                   over light clothing, and keep the tape level.
                 </p>
                 <ul className="flex flex-col gap-y-3">
-                  {HOW_TO_MEASURE.map((step) => (
-                    <li
-                      key={step.label}
-                      className="text-sm leading-relaxed"
-                    >
-                      <span className="text-ink font-medium">
-                        {step.label}:{" "}
-                      </span>
-                      <span className="text-ink/70">{step.text}</span>
-                    </li>
-                  ))}
+                  {chart.columns.map((column) => {
+                    const step = MEASURE_STEPS[column.key]
+
+                    return step ? (
+                      <li
+                        key={column.key}
+                        className="text-sm leading-relaxed"
+                      >
+                        <span className="text-ink font-medium">
+                          {step.label}:{" "}
+                        </span>
+                        <span className="text-ink/70">{step.text}</span>
+                      </li>
+                    ) : null
+                  })}
                 </ul>
               </div>
 

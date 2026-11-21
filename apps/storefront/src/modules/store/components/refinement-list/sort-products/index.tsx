@@ -2,7 +2,13 @@
 
 import FilterRadioGroup from "@modules/common/components/filter-radio-group"
 
-export type SortOptions = "price_asc" | "price_desc" | "created_at"
+export type SortOptions =
+  | "relevance"
+  | "price_asc"
+  | "price_desc"
+  | "created_at"
+  | "title_asc"
+  | "title_desc"
 
 type SortProductsProps = {
   sortBy: SortOptions
@@ -10,18 +16,31 @@ type SortProductsProps = {
   "data-testid"?: string
 }
 
+// The same sort list as the Store page, in the same order and words.
 const sortOptions = [
   {
+    value: "relevance",
+    label: "Relevance",
+  },
+  {
     value: "created_at",
-    label: "Latest Arrivals",
+    label: "Newest first",
   },
   {
     value: "price_asc",
-    label: "Price: Low -> High",
+    label: "Price: Low to High",
   },
   {
     value: "price_desc",
-    label: "Price: High -> Low",
+    label: "Price: High to Low",
+  },
+  {
+    value: "title_asc",
+    label: "Title: A -> Z",
+  },
+  {
+    value: "title_desc",
+    label: "Title: Z -> A",
   },
 ]
 

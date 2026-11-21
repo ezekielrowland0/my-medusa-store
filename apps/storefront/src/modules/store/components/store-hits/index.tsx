@@ -33,6 +33,7 @@ const StoreHits = ({ hitsPerPage, currencyCode }: StoreHitsProps) => {
   const { page, ...refinements } = indexUiState
   const currentPage = page ?? 1
   const refinementKey = JSON.stringify(refinements)
+  const hasSearchQuery = !!indexUiState.query?.trim()
 
   const settled = useRef({ page: currentPage, refinementKey })
 
@@ -69,7 +70,9 @@ const StoreHits = ({ hitsPerPage, currencyCode }: StoreHitsProps) => {
           className="py-16 text-center text-ui-fg-subtle"
           data-testid="no-products"
         >
-          No products matched these filters.
+          {hasSearchQuery
+            ? "No products matched your search."
+            : "No products matched these filters."}
         </Text>
       ) : (
         <ul

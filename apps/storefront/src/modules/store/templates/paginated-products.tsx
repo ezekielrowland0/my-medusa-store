@@ -48,7 +48,7 @@ export default async function PaginatedProducts({
     queryParams["id"] = productsIds
   }
 
-  if (sortBy === "created_at") {
+  if (sortBy === "created_at" || sortBy === "relevance") {
     queryParams["order"] = "created_at"
   }
 

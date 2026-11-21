@@ -28,7 +28,7 @@ const Hero = () => {
             <Fragment key={word}>
               <span
                 className="animate-headline-word"
-                style={{ animationDelay: `${0.15 + index * 0.12}s` }}
+                style={{ animationDelay: `${index * 0.08}s` }}
               >
                 {word}
               </span>

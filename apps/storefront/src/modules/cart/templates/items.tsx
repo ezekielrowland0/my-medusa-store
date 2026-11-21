@@ -12,6 +12,13 @@ type ItemsTemplateProps = {
 
 const ItemsTemplate = ({ cart, inventoryByVariant }: ItemsTemplateProps) => {
   const items = cart?.items
+
+  // No items, no table: an empty cart shows the empty-cart message
+  // (rendered by the cart template) instead of a blank table with headers.
+  if (items && items.length === 0) {
+    return null
+  }
+
   return (
     <div>
       <div className="pb-3 flex items-center">

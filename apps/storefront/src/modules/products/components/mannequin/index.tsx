@@ -14,11 +14,16 @@ const INK = "#1C1A17"
 /**
  * The only colours the shop actually sells (see the seed data in
  * apps/backend/src/migration-scripts/initial-data-seed.ts: Black, White).
+ * A hex value (from the image-filename fallback) is passed through as-is.
  * Anything else falls back to ink, so the mannequin never shows a colour
  * the shop does not sell.
  */
 export const colourToHex = (name?: string | null) => {
-  const lower = (name ?? "").trim().toLowerCase()
+  const trimmed = (name ?? "").trim()
+  if (trimmed.startsWith("#")) {
+    return trimmed
+  }
+  const lower = trimmed.toLowerCase()
   if (lower === "black") return "#1C1A17"
   if (lower === "white") return "#FAF7F2"
   return "#1C1A17"
@@ -58,7 +63,9 @@ type MannequinProps = {
 
 /**
  * A stylised flat fashion-illustration mannequin in a neutral stone tone,
- * standing on a small plinth. Garment layers drawn over the figure follow
+ * standing on a small plinth. Proportions are kept human: a longer torso,
+ * legs about half the figure's height, and arms that end at the wrist,
+ * level with the sleeve hems. Garment layers drawn over the figure follow
  * the chosen pieces: short-sleeve tee, long-sleeve sweatshirt, long
  * sweatpants, or shorts, each filled with the real variant colour.
  * Colour changes glide (CSS transition on fill). Size never changes the
@@ -105,53 +112,53 @@ export default function Mannequin({
         />
 
         {/* Figure — head, neck, torso, arms, legs */}
-        <circle cx="110" cy="36" r="16" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
-        <path d="M103 50 h14 v14 h-14 z" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
+        <circle cx="110" cy="34" r="15" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
+        <path d="M103 47 h14 v16 h-14 z" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
         <path
-          d="M82 74 C92 66 128 66 138 74 L140 128 C141 150 138 168 134 178 L86 178 C82 168 79 150 80 128 Z"
+          d="M82 76 C92 67 128 67 138 76 L140 130 C141 162 138 192 134 210 L86 210 C82 192 79 162 80 130 Z"
           fill={FIGURE_FILL}
           stroke={INK}
           strokeWidth="1.2"
         />
         {/* Arms: a wider ink stroke underneath gives the stone stroke its outline */}
         <path
-          d="M84 80 C72 92 68 128 67 164 C66 182 66 196 67 206"
+          d="M84 82 C74 94 70 128 69 162 C68 176 68 186 69 194"
           fill="none"
           stroke={INK}
           strokeWidth="15"
           strokeLinecap="round"
         />
         <path
-          d="M84 80 C72 92 68 128 67 164 C66 182 66 196 67 206"
+          d="M84 82 C74 94 70 128 69 162 C68 176 68 186 69 194"
           fill="none"
           stroke={FIGURE_FILL}
           strokeWidth="12.5"
           strokeLinecap="round"
         />
         <path
-          d="M136 80 C148 92 152 128 153 164 C154 182 154 196 153 206"
+          d="M136 82 C146 94 150 128 151 162 C152 176 152 186 151 194"
           fill="none"
           stroke={INK}
           strokeWidth="15"
           strokeLinecap="round"
         />
         <path
-          d="M136 80 C148 92 152 128 153 164 C154 182 154 196 153 206"
+          d="M136 82 C146 94 150 128 151 162 C152 176 152 186 151 194"
           fill="none"
           stroke={FIGURE_FILL}
           strokeWidth="12.5"
           strokeLinecap="round"
         />
-        <circle cx="67" cy="209" r="6" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
-        <circle cx="153" cy="209" r="6" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
+        <circle cx="69" cy="197" r="6" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
+        <circle cx="151" cy="197" r="6" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
         <path
-          d="M94 178 L90 300 L88 420 L103 420 L105 300 L107 178 Z"
+          d="M94 210 L90 310 L88 420 L103 420 L105 310 L107 210 Z"
           fill={FIGURE_FILL}
           stroke={INK}
           strokeWidth="1.2"
         />
         <path
-          d="M113 178 L115 300 L117 420 L132 420 L130 300 L126 178 Z"
+          d="M113 210 L115 310 L117 420 L132 420 L130 310 L126 210 Z"
           fill={FIGURE_FILL}
           stroke={INK}
           strokeWidth="1.2"
@@ -163,7 +170,7 @@ export default function Mannequin({
         {top?.kind === "tshirt" && (
           <g>
             <path
-              d="M80 72 C90 66 130 66 140 72 L162 96 L148 116 L138 104 L136 148 C136 166 132 176 128 182 L92 182 C88 176 84 166 84 148 L82 104 L72 116 L58 96 Z"
+              d="M80 72 C90 66 130 66 140 72 L162 96 L148 116 L138 104 L136 150 C136 172 132 188 128 196 L92 196 C88 188 84 172 84 150 L82 104 L72 116 L58 96 Z"
               fill={topFill}
               stroke={INK}
               strokeWidth="1.2"
@@ -181,29 +188,29 @@ export default function Mannequin({
         {top?.kind === "sweatshirt" && (
           <g>
             <path
-              d="M80 72 C90 66 130 66 140 72 L140 148 C140 166 136 176 130 182 L90 182 C84 176 80 166 80 148 Z"
+              d="M80 72 C90 66 130 66 140 72 L140 150 C140 172 136 188 130 196 L90 196 C84 188 80 172 80 150 Z"
               fill={topFill}
               stroke={INK}
               strokeWidth="1.2"
               className="mannequin-garment"
             />
             <path
-              d="M80 74 C70 84 65 118 64 158 C63 180 63 196 64 206 L78 206 C78 192 79 172 80 150 C81 124 84 98 90 82 Z"
+              d="M80 74 C70 84 65 118 64 158 C63 178 63 188 64 196 L78 196 C78 186 79 170 80 150 C81 124 84 98 90 82 Z"
               fill={topFill}
               stroke={INK}
               strokeWidth="1.2"
               className="mannequin-garment"
             />
             <path
-              d="M140 74 C150 84 155 118 156 158 C157 180 157 196 156 206 L142 206 C142 192 141 172 140 150 C139 124 136 98 130 82 Z"
+              d="M140 74 C150 84 155 118 156 158 C157 178 157 188 156 196 L142 196 C142 186 141 170 140 150 C139 124 136 98 130 82 Z"
               fill={topFill}
               stroke={INK}
               strokeWidth="1.2"
               className="mannequin-garment"
             />
-            <path d="M82 168 L138 168" stroke={INK} strokeWidth="1" opacity="0.4" />
-            <path d="M64 196 L78 196" stroke={INK} strokeWidth="1" opacity="0.4" />
-            <path d="M142 196 L156 196" stroke={INK} strokeWidth="1" opacity="0.4" />
+            <path d="M82 182 L138 182" stroke={INK} strokeWidth="1" opacity="0.4" />
+            <path d="M64 186 L78 186" stroke={INK} strokeWidth="1" opacity="0.4" />
+            <path d="M142 186 L156 186" stroke={INK} strokeWidth="1" opacity="0.4" />
             <path
               d="M96 72 Q110 82 124 72"
               fill="none"
@@ -218,14 +225,14 @@ export default function Mannequin({
         {bottom?.kind === "sweatpants" && (
           <g>
             <path
-              d="M87 187 L85 300 L84 418 L100 418 L103 300 L106 187 Z"
+              d="M87 209 L85 310 L84 418 L100 418 L103 310 L106 209 Z"
               fill={bottomFill}
               stroke={INK}
               strokeWidth="1.2"
               className="mannequin-garment"
             />
             <path
-              d="M114 187 L117 300 L120 418 L136 418 L135 300 L133 187 Z"
+              d="M114 209 L117 310 L120 418 L136 418 L135 310 L133 209 Z"
               fill={bottomFill}
               stroke={INK}
               strokeWidth="1.2"
@@ -233,7 +240,7 @@ export default function Mannequin({
             />
             <rect
               x="86"
-              y="176"
+              y="198"
               width="48"
               height="11"
               rx="2"
@@ -242,20 +249,20 @@ export default function Mannequin({
               strokeWidth="1.2"
               className="mannequin-garment"
             />
-            <path d="M104 180 v8 M116 180 v8" stroke={INK} strokeWidth="1" opacity="0.5" />
+            <path d="M104 202 v8 M116 202 v8" stroke={INK} strokeWidth="1" opacity="0.5" />
           </g>
         )}
         {bottom?.kind === "shorts" && (
           <g>
             <path
-              d="M87 187 L86 252 L105 252 L107 187 Z"
+              d="M87 209 L86 265 L105 265 L107 209 Z"
               fill={bottomFill}
               stroke={INK}
               strokeWidth="1.2"
               className="mannequin-garment"
             />
             <path
-              d="M113 187 L115 252 L134 252 L133 187 Z"
+              d="M113 209 L115 265 L134 265 L133 209 Z"
               fill={bottomFill}
               stroke={INK}
               strokeWidth="1.2"
@@ -263,7 +270,7 @@ export default function Mannequin({
             />
             <rect
               x="86"
-              y="176"
+              y="198"
               width="48"
               height="11"
               rx="2"

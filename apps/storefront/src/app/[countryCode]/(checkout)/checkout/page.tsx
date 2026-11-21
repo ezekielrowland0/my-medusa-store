@@ -4,7 +4,7 @@ import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
-import { notFound, redirect } from "next/navigation"
+import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Checkout",
@@ -16,8 +16,10 @@ export default async function Checkout(props: {
   const { countryCode } = await props.params
   const cart = await retrieveCart()
 
+  // No cart means nothing to check out — send the visitor to the cart
+  // page instead of a dead end.
   if (!cart) {
-    return notFound()
+    redirect(`/${countryCode}/cart`)
   }
 
   const customer = await retrieveCustomer()

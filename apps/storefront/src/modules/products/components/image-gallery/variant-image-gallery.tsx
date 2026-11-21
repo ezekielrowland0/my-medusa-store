@@ -4,6 +4,7 @@ import { HttpTypes } from "@medusajs/types"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import ImageGallery from "."
+import { imagesForColour } from "@lib/util/product-image-colour"
 
 const getImagesForVariant = (
   product: HttpTypes.StoreProduct,
@@ -14,12 +15,34 @@ const getImagesForVariant = (
   }
 
   const variant = product.variants!.find((v) => v.id === selectedVariantId)
-  if (!variant || !variant.images?.length) {
+  if (!variant) {
     return product.images
   }
 
-  const imageIdsMap = new Map(variant.images!.map((i) => [i.id, true]))
-  return product.images?.filter((i) => imageIdsMap.has(i.id)) ?? null
+  if (variant.images?.length) {
+    const imageIdsMap = new Map(variant.images!.map((i) => [i.id, true]))
+    return product.images?.filter((i) => imageIdsMap.has(i.id)) ?? null
+  }
+
+  // No images are linked to any variant in the seed data, so the variant's
+  // own images can never match. Fall back to the colour in the image
+  // filenames: the variant's Colour value (e.g. White) against the file
+  // names (e.g. tee-white-front.png). When nothing matches, show all
+  // images as before.
+  const colourOption = product.options?.find(
+    (option) => option.title?.toLowerCase() === "color"
+  )
+  const colourValue = variant.options?.find(
+    (option) => option.option_id === colourOption?.id
+  )?.value
+  if (colourValue) {
+    const matched = imagesForColour(product.images, colourValue)
+    if (matched.length) {
+      return matched as HttpTypes.StoreProductImage[]
+    }
+  }
+
+  return product.images
 }
 
 /**
@@ -50,7 +73,15 @@ const VariantImageGallery = ({
       ? product.metadata.video_url
       : null
 
-  return <ImageGallery images={images} videoUrl={videoUrl} />
+  // Reset the gallery (active image, zoom) when the variant changes, so
+  // the first photo of the new colour is shown, not a leftover position.
+  return (
+    <ImageGallery
+      key={variantId ?? "all"}
+      images={images}
+      videoUrl={videoUrl}
+    />
+  )
 }
 
 export default VariantImageGallery

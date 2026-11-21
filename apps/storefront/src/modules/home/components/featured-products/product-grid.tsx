@@ -40,7 +40,7 @@ export default async function ProductGrid({
           <InteractiveLink href="/store">View all</InteractiveLink>
         </div>
       </Reveal>
-      <ul className="grid grid-cols-2 small:grid-cols-3 gap-x-10 gap-y-28 small:gap-y-36">
+      <ul className="grid grid-cols-2 small:grid-cols-4 gap-x-10 gap-y-28 small:gap-y-36">
         {pricedProducts.map((product, index) => (
           <li key={product.id}>
             <Reveal delay={Math.min(index, 5) * 90}>

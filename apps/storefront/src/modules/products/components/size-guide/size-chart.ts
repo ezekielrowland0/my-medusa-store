@@ -1,5 +1,5 @@
 /**
- * The shop's size chart, kept in one place so it is easy to change.
+ * The shop's size charts, kept in one place so they are easy to change.
  *
  * IMPORTANT: these are STANDARD body measurements for general clothing
  * sizes, not measurements taken from the shop's own garments. If Cody
@@ -11,89 +11,192 @@
  * chest measuring 38–40 inches (97–102 cm) around the widest part.
  */
 
-export type SizeRow = {
-  size: string
-  chestIn: string
-  waistIn: string
-  hipIn: string
-  heightIn: string
-  chestCm: string
-  waistCm: string
-  hipCm: string
-  heightCm: string
+import { HttpTypes } from "@medusajs/types"
+
+export type SizeChartColumn = {
+  key: string
+  label: string
 }
 
-export const SIZE_CHART: SizeRow[] = [
-  {
-    size: "S",
-    chestIn: "34–36",
-    waistIn: "28–30",
-    hipIn: "34–36",
-    heightIn: "66–69",
-    chestCm: "86–91",
-    waistCm: "71–76",
-    hipCm: "86–91",
-    heightCm: "168–175",
-  },
-  {
-    size: "M",
-    chestIn: "38–40",
-    waistIn: "32–34",
-    hipIn: "38–40",
-    heightIn: "69–72",
-    chestCm: "97–102",
-    waistCm: "81–86",
-    hipCm: "97–102",
-    heightCm: "175–183",
-  },
-  {
-    size: "L",
-    chestIn: "42–44",
-    waistIn: "36–38",
-    hipIn: "42–44",
-    heightIn: "71–74",
-    chestCm: "107–112",
-    waistCm: "91–97",
-    hipCm: "107–112",
-    heightCm: "180–188",
-  },
-  {
-    size: "XL",
-    chestIn: "46–48",
-    waistIn: "40–42",
-    hipIn: "46–48",
-    heightIn: "72–75",
-    chestCm: "117–122",
-    waistCm: "102–107",
-    hipCm: "117–122",
-    heightCm: "183–191",
-  },
-]
+export type SizeChartCell = {
+  inches: string
+  cm: string
+}
+
+export type SizeChartRow = {
+  size: string
+  cells: Record<string, SizeChartCell>
+}
+
+export type SizeChart = {
+  columns: SizeChartColumn[]
+  rows: SizeChartRow[]
+}
+
+const cell = (inches: string, cm: string): SizeChartCell => ({ inches, cm })
+
+/** Tops (shirts, sweatshirts): chest, waist and length. */
+export const TOPS_CHART: SizeChart = {
+  columns: [
+    { key: "chest", label: "Chest" },
+    { key: "waist", label: "Waist" },
+    { key: "length", label: "Length" },
+  ],
+  rows: [
+    {
+      size: "S",
+      cells: {
+        chest: cell("34–36", "86–91"),
+        waist: cell("28–30", "71–76"),
+        length: cell("27", "69"),
+      },
+    },
+    {
+      size: "M",
+      cells: {
+        chest: cell("38–40", "97–102"),
+        waist: cell("32–34", "81–86"),
+        length: cell("28", "71"),
+      },
+    },
+    {
+      size: "L",
+      cells: {
+        chest: cell("42–44", "107–112"),
+        waist: cell("36–38", "91–97"),
+        length: cell("29", "74"),
+      },
+    },
+    {
+      size: "XL",
+      cells: {
+        chest: cell("46–48", "117–122"),
+        waist: cell("40–42", "102–107"),
+        length: cell("30", "76"),
+      },
+    },
+  ],
+}
+
+/**
+ * Bottoms (pants, shorts): waist, hip and inseam. The hip values are
+ * distinct from the chest values — hips are wider than chests at every
+ * size, so a shared column would be wrong.
+ */
+export const BOTTOMS_CHART: SizeChart = {
+  columns: [
+    { key: "waist", label: "Waist" },
+    { key: "hip", label: "Hip" },
+    { key: "inseam", label: "Inseam" },
+  ],
+  rows: [
+    {
+      size: "S",
+      cells: {
+        waist: cell("28–30", "71–76"),
+        hip: cell("35–37", "89–94"),
+        inseam: cell("30", "76"),
+      },
+    },
+    {
+      size: "M",
+      cells: {
+        waist: cell("32–34", "81–86"),
+        hip: cell("39–41", "99–104"),
+        inseam: cell("31", "79"),
+      },
+    },
+    {
+      size: "L",
+      cells: {
+        waist: cell("36–38", "91–97"),
+        hip: cell("43–45", "109–114"),
+        inseam: cell("32", "81"),
+      },
+    },
+    {
+      size: "XL",
+      cells: {
+        waist: cell("40–42", "102–107"),
+        hip: cell("47–49", "119–124"),
+        inseam: cell("33", "84"),
+      },
+    },
+  ],
+}
+
+export type SizeChartKind = "tops" | "bottoms"
+
+/**
+ * Which chart a product gets, from its title and handle first (e.g.
+ * Medusa Shorts sits in the "Merch" category but is still a bottom),
+ * then its category. Defaults to tops.
+ */
+export const getSizeChartKind = (
+  product: HttpTypes.StoreProduct
+): SizeChartKind => {
+  const text = [product.title ?? "", product.handle ?? ""]
+    .join(" ")
+    .toLowerCase()
+
+  if (
+    text.includes("pant") ||
+    text.includes("short") ||
+    text.includes("skirt") ||
+    text.includes("trouser") ||
+    text.includes("jean")
+  ) {
+    return "bottoms"
+  }
+
+  if (
+    text.includes("shirt") ||
+    text.includes("tee") ||
+    text.includes("sweatshirt") ||
+    text.includes("hoodie") ||
+    text.includes("jacket") ||
+    text.includes("knit") ||
+    text.includes("sweater")
+  ) {
+    return "tops"
+  }
+
+  const category = (product.categories ?? [])[0]?.name?.toLowerCase() ?? ""
+
+  return category.includes("pant") ? "bottoms" : "tops"
+}
+
+export const getSizeChart = (product: HttpTypes.StoreProduct): SizeChart =>
+  getSizeChartKind(product) === "bottoms" ? BOTTOMS_CHART : TOPS_CHART
 
 export type MeasureStep = {
   label: string
   text: string
 }
 
-/** How to measure at home with a tape, in plain words. */
-export const HOW_TO_MEASURE: MeasureStep[] = [
-  {
+/** How to measure at home with a tape, in plain words, keyed by column. */
+export const MEASURE_STEPS: Record<string, MeasureStep> = {
+  chest: {
     label: "Chest",
     text: "Wrap the tape around the widest part of your chest, under your arms, keeping it level. Stand relaxed and do not pull the tape tight.",
   },
-  {
+  waist: {
     label: "Waist",
     text: "Measure around your natural waist, just above your hip bones, where your body bends when you lean to the side. Keep the tape snug but not tight.",
   },
-  {
+  hip: {
     label: "Hip",
     text: "Stand with your feet together and wrap the tape around the widest part of your hips and bottom.",
   },
-  {
-    label: "Height",
-    text: "Stand barefoot with your back flat against a wall, have someone mark the top of your head, then measure from the floor to the mark.",
+  length: {
+    label: "Length",
+    text: "Measure from the highest point of your shoulder, where it meets your neck, straight down to the hem.",
   },
-]
+  inseam: {
+    label: "Inseam",
+    text: "Measure from the inside of your leg at the crotch straight down to your ankle — or measure a pair of trousers you like, from the crotch seam to the hem.",
+  },
+}
 
 /**
  * Fit notes per product category. The shop keeps no fit data of its own,

@@ -297,7 +297,7 @@ const ImageGallery = ({ images, videoUrl }: ImageGalleryProps) => {
       <div className="flex flex-col flex-1 small:mx-16 gap-y-4">
         <div
           ref={viewerRef}
-          className="group relative aspect-[29/34] w-full overflow-hidden bg-stone rounded-rounded select-none"
+          className="group relative aspect-[29/34] w-full overflow-hidden bg-stone border border-stone rounded-rounded select-none"
           style={{ touchAction: "none" }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -325,7 +325,7 @@ const ImageGallery = ({ images, videoUrl }: ImageGalleryProps) => {
                 alt={activeItem.alt}
                 fill
                 sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
-                style={{ objectFit: "cover" }}
+                style={{ objectFit: "contain" }}
                 draggable={false}
               />
             </div>
@@ -410,7 +410,7 @@ const ImageGallery = ({ images, videoUrl }: ImageGalleryProps) => {
                 }
                 onClick={() => goTo(index)}
                 className={clx(
-                  "relative shrink-0 w-[72px] aspect-[29/34] overflow-hidden rounded-rounded bg-stone transition-shadow",
+                  "relative shrink-0 w-[72px] aspect-[29/34] overflow-hidden rounded-rounded bg-stone border border-stone transition-shadow",
                   index === activeIndex
                     ? "ring-2 ring-brass ring-offset-2 ring-offset-ivory"
                     : "opacity-70 hover:opacity-100"
@@ -422,7 +422,7 @@ const ImageGallery = ({ images, videoUrl }: ImageGalleryProps) => {
                     alt={item.alt}
                     fill
                     sizes="72px"
-                    style={{ objectFit: "cover" }}
+                    style={{ objectFit: "contain" }}
                     draggable={false}
                   />
                 ) : (

@@ -1,7 +1,12 @@
 "use client"
 
-import { useClearRefinements, useSortBy } from "react-instantsearch"
+import {
+  useClearRefinements,
+  useInstantSearch,
+  useSortBy,
+} from "react-instantsearch"
 
+import { PRODUCT_INDEX_NAME } from "@lib/search-client"
 import FilterRadioGroup from "@modules/common/components/filter-radio-group"
 import {
   CATEGORY_ATTRIBUTE,
@@ -31,18 +36,36 @@ const SortProducts = ({ currencyCode }: { currencyCode: string }) => {
 
 /**
  * Always visible at the top of the filter panel. It resets every active
- * refinement (sort and the free-text query are left alone) and is disabled
- * while there is nothing to clear, so the button never vanishes on the
- * visitor.
+ * refinement, the sort and the free-text query, and is disabled only while
+ * there is nothing to clear, so the button never vanishes on the visitor.
+ * `useClearRefinements` on its own clears neither the sort nor the query
+ * (the query is excluded by default), so those are reset through the
+ * InstantSearch ui state here.
  */
 const ClearAllFilters = () => {
   const { canRefine, refine } = useClearRefinements()
+  const { indexUiState, setIndexUiState } = useInstantSearch()
+
+  const sortIsDefault =
+    !indexUiState.sortBy || indexUiState.sortBy === PRODUCT_INDEX_NAME
+  const hasSomethingToClear =
+    canRefine || !!indexUiState.query || !sortIsDefault
+
+  const clearAll = () => {
+    refine()
+    setIndexUiState((prev) => ({
+      ...prev,
+      query: "",
+      sortBy: PRODUCT_INDEX_NAME,
+      page: 1,
+    }))
+  }
 
   return (
     <button
       type="button"
-      onClick={refine}
-      disabled={!canRefine}
+      onClick={clearAll}
+      disabled={!hasSomethingToClear}
       className="txt-compact-small-plus w-fit uppercase tracking-[0.15em] text-brass transition-colors duration-150 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
       data-testid="clear-all-filters"
     >

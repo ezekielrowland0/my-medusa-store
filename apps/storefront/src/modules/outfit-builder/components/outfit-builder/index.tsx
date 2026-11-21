@@ -6,6 +6,10 @@ import { getProductPrice } from "@lib/util/get-product-price"
 import { isVariantInStock } from "@lib/util/inventory"
 import { convertToLocale } from "@lib/util/money"
 import { notifyCartUpdated } from "@lib/util/cart-events"
+import {
+  colourHexFromImageFilenames,
+  imageUrlForColour,
+} from "@lib/util/product-image-colour"
 import { HttpTypes } from "@medusajs/types"
 import { Button, clx } from "@modules/common/components/ui"
 import ItemEmblem from "@modules/common/components/item-emblem"
@@ -47,8 +51,30 @@ const optionsAsKeymap = (
   }, {})
 }
 
-const getDefaultVariant = (product: HttpTypes.StoreProduct) =>
-  product.variants?.find(isVariantInStock) ?? product.variants?.[0]
+/**
+ * The variant shown when a piece is picked: size M when the product comes
+ * in M (so every piece starts on the same size), otherwise the first
+ * in-stock variant.
+ */
+const getDefaultVariant = (product: HttpTypes.StoreProduct) => {
+  const variants = product.variants ?? []
+  const sizeOption = product.options?.find(
+    (option) => option.title?.toLowerCase() === "size"
+  )
+  const medium =
+    sizeOption &&
+    variants.find(
+      (variant) =>
+        isVariantInStock(variant) &&
+        variant.options?.some(
+          (variantOption) =>
+            variantOption.option_id === sizeOption.id &&
+            variantOption.value === "M"
+        )
+    )
+
+  return medium ?? variants.find(isVariantInStock) ?? variants[0]
+}
 
 const defaultOptionsFor = (product: HttpTypes.StoreProduct) =>
   optionsAsKeymap(getDefaultVariant(product)?.options ?? null) ?? {}
@@ -101,7 +127,12 @@ const garmentForSelection = (
     return null
   if (slot === "bottom" && kind !== "sweatpants" && kind !== "shorts")
     return null
-  return { kind, color: optionValueByTitle(selection, "Color") ?? "" }
+  // Pieces with no Colour option still have a colour to wear: read it from
+  // the shop's own image filenames (e.g. sweatshirt-vintage-front.png).
+  const color =
+    optionValueByTitle(selection, "Color") ??
+    colourHexFromImageFilenames(selection.product.images)
+  return { kind, color }
 }
 
 type SlotCardProps = {
@@ -131,6 +162,9 @@ const SlotCard = ({
         data-testid={`outfit-slot-${slot}-empty`}
       >
         <span className="font-display text-xl text-ink mb-2">
+          {slot === "accessory" ? "Accessories" : label}
+        </span>
+        <span className="text-sm text-ui-fg-subtle mb-2">
           {SLOT_EMPTY_COPY[slot]}
         </span>
         <p className="text-sm text-ui-fg-subtle max-w-[220px]">
@@ -184,6 +218,13 @@ const SlotCard = ({
   const price = getPriceForSelection(selection)
   const inStock = isVariantInStock(variant)
   const description = variantDescription(variant)
+  // Show the photo of the colour actually chosen (e.g. the white photo
+  // when White is picked), matched from the image filenames — the default
+  // thumbnail is the first photo, which is the black one.
+  const chosenColour = optionValueByTitle(selection, "Color")
+  const colourMatchedImage = chosenColour
+    ? imageUrlForColour(product.images, chosenColour)
+    : undefined
 
   return (
     <div
@@ -191,7 +232,7 @@ const SlotCard = ({
       data-testid={`outfit-slot-${slot}-filled`}
     >
       <Thumbnail
-        thumbnail={product.thumbnail}
+        thumbnail={colourMatchedImage ?? product.thumbnail}
         images={product.images}
         alt={product.title}
         size="square"
@@ -433,7 +474,7 @@ export default function OutfitBuilder({
           Build your look
         </h1>
         <p className="text-ui-fg-subtle mt-4 max-w-lg mx-auto">
-          Pick one piece for each slot. Swap any piece without starting over —
+          Pick a top and a bottom. Swap any piece without starting over —
           your other choices stay put.
         </p>
       </div>
@@ -519,8 +560,8 @@ export default function OutfitBuilder({
             {justAdded
               ? "✓ Added to your bag"
               : selectedPieces.length === 0
-              ? "Add Complete Look to Cart"
-              : `Add Complete Look to Cart · ${totalLabel}`}
+              ? "Add Look to Cart"
+              : `Add Look to Cart · ${totalLabel}`}
           </Button>
         </div>
 

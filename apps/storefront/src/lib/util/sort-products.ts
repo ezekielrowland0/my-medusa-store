@@ -38,11 +38,20 @@ export function sortProducts(
     })
   }
 
-  if (sortBy === "created_at") {
+  if (sortBy === "created_at" || sortBy === "relevance") {
+    // "Relevance" is the shop's default order. Category pages have no
+    // search ranking, so the default order is newest first.
     sortedProducts.sort((a, b) => {
       return (
         new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime()
       )
+    })
+  }
+
+  if (sortBy === "title_asc" || sortBy === "title_desc") {
+    sortedProducts.sort((a, b) => {
+      const diff = (a.title ?? "").localeCompare(b.title ?? "")
+      return sortBy === "title_asc" ? diff : -diff
     })
   }
 

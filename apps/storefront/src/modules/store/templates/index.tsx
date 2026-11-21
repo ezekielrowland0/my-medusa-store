@@ -21,8 +21,7 @@ const StoreTemplate = ({ currencyCode }: { currencyCode: string }) => {
           href="/outfit-builder"
           className="block mt-3 text-base font-sans text-brass underline underline-offset-4 hover:text-ink"
         >
-          Build a Look — mix a top, bottom, shoes and accessory into one
-          outfit
+          Build a Look — mix a top and a bottom into one outfit
         </LocalizedClientLink>
       </div>
 

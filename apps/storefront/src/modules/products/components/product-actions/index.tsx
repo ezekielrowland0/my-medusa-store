@@ -4,6 +4,7 @@ import { addToCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { notifyCartUpdated } from "@lib/util/cart-events"
+import { colourHexFromImageFilenames } from "@lib/util/product-image-colour"
 import { isVariantInStock } from "@lib/util/inventory"
 import { HttpTypes } from "@medusajs/types"
 import { Button, clx } from "@modules/common/components/ui"
@@ -38,8 +39,30 @@ const optionsAsKeymap = (
   }, {})
 }
 
-const getDefaultVariant = (product: HttpTypes.StoreProduct) =>
-  product.variants?.find(isVariantInStock) ?? product.variants?.[0]
+/**
+ * The variant shown when a visitor lands on the product: size M when the
+ * product comes in M (so every product starts on the same size), otherwise
+ * the first in-stock variant.
+ */
+const getDefaultVariant = (product: HttpTypes.StoreProduct) => {
+  const variants = product.variants ?? []
+  const sizeOption = product.options?.find(
+    (option) => option.title?.toLowerCase() === "size"
+  )
+  const medium =
+    sizeOption &&
+    variants.find(
+      (variant) =>
+        isVariantInStock(variant) &&
+        variant.options?.some(
+          (variantOption) =>
+            variantOption.option_id === sizeOption.id &&
+            variantOption.value === "M"
+        )
+    )
+
+  return medium ?? variants.find(isVariantInStock) ?? variants[0]
+}
 
 export default function ProductActions({
   product,
@@ -141,14 +164,21 @@ export default function ProductActions({
 
   const selectedSize = optionValueByTitle("Size")
   const selectedColor = optionValueByTitle("Color")
+  const hasColorOption = product.options?.some(
+    (option) => option.title?.toLowerCase() === "color"
+  )
+  // Pieces with no Colour option still have a colour to wear: read it from
+  // the shop's own image filenames (e.g. sweatshirt-vintage-front.png).
+  const garmentColour =
+    selectedColor ?? colourHexFromImageFilenames(product.images)
   const garmentKind = garmentKindFor(product)
   const wornTop: WornGarment | null =
     garmentKind === "tshirt" || garmentKind === "sweatshirt"
-      ? { kind: garmentKind, color: selectedColor ?? "" }
+      ? { kind: garmentKind, color: garmentColour }
       : null
   const wornBottom: WornGarment | null =
     garmentKind === "sweatpants" || garmentKind === "shorts"
-      ? { kind: garmentKind, color: selectedColor ?? "" }
+      ? { kind: garmentKind, color: garmentColour }
       : null
   const wearingLabel = `Wearing: ${product.title}${
     selectedSize ? ` — Size ${selectedSize}` : ""
@@ -242,9 +272,7 @@ export default function ProductActions({
                       />
                       {option.title === "Size" && (
                         <div className="flex justify-end mt-3">
-                          <SizeGuide
-                            categoryName={product.categories?.[0]?.name}
-                          />
+                          <SizeGuide product={product} />
                         </div>
                       )}
                     </div>
@@ -314,7 +342,9 @@ export default function ProductActions({
             />
           </div>
           <p className="text-xs text-ui-fg-subtle text-center mt-3">
-            Pick a size and colour — the mannequin updates as you choose.
+            {hasColorOption
+              ? "Pick a size and colour — the mannequin updates as you choose."
+              : "Pick a size — the mannequin updates as you choose."}
           </p>
         </div>
         {showToast && (
