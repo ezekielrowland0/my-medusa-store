@@ -4,6 +4,8 @@ import type { SearchClient } from "instantsearch.js"
 import { Configure, InstantSearch } from "react-instantsearch"
 
 import { PRODUCT_INDEX_NAME, searchClient } from "@lib/search-client"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import MobileFilterSheet from "@modules/store/components/mobile-filter-sheet"
 import StoreHits from "@modules/store/components/store-hits"
 import StoreRefinements from "@modules/store/components/store-refinements"
 import StoreSearchBox from "@modules/store/components/store-search-box"
@@ -15,6 +17,13 @@ const StoreTemplate = ({ currencyCode }: { currencyCode: string }) => {
     <div className="py-6 content-container" data-testid="category-container">
       <div className="mb-8 text-2xl-semi">
         <h1 data-testid="store-page-title">All products</h1>
+        <LocalizedClientLink
+          href="/outfit-builder"
+          className="block mt-3 text-base font-sans text-brass underline underline-offset-4 hover:text-ink"
+        >
+          Build a Look — mix a top, bottom, shoes and accessory into one
+          outfit
+        </LocalizedClientLink>
       </div>
 
       <div className="flex flex-col small:flex-row small:items-start">
@@ -25,8 +34,11 @@ const StoreTemplate = ({ currencyCode }: { currencyCode: string }) => {
           future={{ preserveSharedStateOnUnmount: true }}
         >
           <Configure hitsPerPage={PRODUCT_LIMIT} />
-          <StoreRefinements currencyCode={currencyCode} />
+          <div className="hidden small:block small:shrink-0">
+            <StoreRefinements currencyCode={currencyCode} />
+          </div>
           <div className="w-full min-w-0">
+            <MobileFilterSheet currencyCode={currencyCode} />
             <StoreSearchBox />
             <StoreHits
               hitsPerPage={PRODUCT_LIMIT}

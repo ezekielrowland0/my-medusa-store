@@ -10,8 +10,12 @@ export enum LOGIN_VIEW {
   REGISTER = "register",
 }
 
-const LoginTemplate = () => {
-  const [currentView, setCurrentView] = useState("sign-in")
+const LoginTemplate = ({
+  defaultView = LOGIN_VIEW.SIGN_IN,
+}: {
+  defaultView?: LOGIN_VIEW
+}) => {
+  const [currentView, setCurrentView] = useState<LOGIN_VIEW>(defaultView)
 
   return (
     <div className="w-full flex justify-start px-8 py-8">

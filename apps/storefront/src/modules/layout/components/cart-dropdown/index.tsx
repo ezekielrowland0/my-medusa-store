@@ -34,6 +34,8 @@ const CartDropdown = ({
     undefined
   )
   const [cartDropdownOpen, setCartDropdownOpen] = useState(false)
+  // Bumps every time the cart count changes, replaying the badge pop.
+  const [popKey, setPopKey] = useState(0)
 
   const open = () => setCartDropdownOpen(true)
   const close = () => setCartDropdownOpen(false)
@@ -97,6 +99,8 @@ const CartDropdown = ({
   useEffect(() => {
     if (itemRef.current !== totalItems && !pathname.includes("/cart")) {
       timedOpen()
+      // Pop the cart badge to mark the new item.
+      setPopKey((k) => k + 1)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalItems, itemRef.current])
@@ -113,7 +117,17 @@ const CartDropdown = ({
             className="hover:text-ui-fg-base"
             href="/cart"
             data-testid="nav-cart-link"
-          >{`Cart (${totalItems})`}</LocalizedClientLink>
+          >
+            Cart{" "}
+            <span
+              key={popKey}
+              className={
+                popKey > 0 ? "inline-block animate-cart-pop" : "inline-block"
+              }
+            >
+              ({totalItems})
+            </span>
+          </LocalizedClientLink>
         </PopoverButton>
         <Transition
           show={cartDropdownOpen}

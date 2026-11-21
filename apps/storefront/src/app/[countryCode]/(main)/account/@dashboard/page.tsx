@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 
 import Overview from "@modules/account/components/overview"
+import ReturnAfterLogin from "@modules/account/components/return-after-login"
 import { notFound } from "next/navigation"
 import { retrieveCustomer } from "@lib/data/customer"
 import { listOrders } from "@lib/data/orders"
@@ -18,5 +19,10 @@ export default async function OverviewTemplate() {
     notFound()
   }
 
-  return <Overview customer={customer} orders={orders} />
+  return (
+    <>
+      <ReturnAfterLogin />
+      <Overview customer={customer} orders={orders} />
+    </>
+  )
 }

@@ -13,9 +13,18 @@ type CartTotalsProps = {
     shipping_subtotal?: number | null
     discount_subtotal?: number | null
   }
+  /**
+   * When true and no shipping amount is set yet, shipping is shown as
+   * "Calculated at checkout" under an "Estimated shipping" label instead
+   * of €0.00, so customers are not misled into thinking delivery is free.
+   */
+  showShippingAsEstimated?: boolean
 }
 
-const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
+const CartTotals: React.FC<CartTotalsProps> = ({
+  totals,
+  showShippingAsEstimated,
+}) => {
   const {
     currency_code,
     total,
@@ -35,9 +44,18 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span>Shipping</span>
+          <span>
+            {showShippingAsEstimated && !shipping_subtotal
+              ? "Estimated shipping"
+              : "Shipping"}
+          </span>
           <span data-testid="cart-shipping" data-value={shipping_subtotal || 0}>
-            {convertToLocale({ amount: shipping_subtotal ?? 0, currency_code })}
+            {showShippingAsEstimated && !shipping_subtotal
+              ? "Calculated at checkout"
+              : convertToLocale({
+                  amount: shipping_subtotal ?? 0,
+                  currency_code,
+                })}
           </span>
         </div>
         {!!discount_subtotal && (

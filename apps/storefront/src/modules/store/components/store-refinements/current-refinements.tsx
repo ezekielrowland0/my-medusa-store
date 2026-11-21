@@ -1,7 +1,7 @@
 "use client"
 
 import { XMarkMini } from "@medusajs/icons"
-import { useClearRefinements, useCurrentRefinements } from "react-instantsearch"
+import { useCurrentRefinements } from "react-instantsearch"
 
 import { indexedCurrency, priceAttribute } from "@lib/search-client"
 import { convertToLocale } from "@lib/util/money"
@@ -63,11 +63,11 @@ function refinementLabel(refinement: Refinement, currencyCode: string) {
 /**
  * Every active refinement as a chip that drops it, above the filters that set
  * them. The free-text query is excluded by the connector's own defaults, so
- * only what the sidebar controls shows up here.
+ * only what the sidebar controls shows up here. Clearing everything lives on
+ * the "Clear All Filters" button at the top of the panel, not here.
  */
 const CurrentRefinements = ({ currencyCode }: { currencyCode: string }) => {
   const { items, refine } = useCurrentRefinements()
-  const { canRefine: canClearAll, refine: clearAll } = useClearRefinements()
 
   const refinements = items.flatMap((item) => item.refinements)
 
@@ -77,19 +77,10 @@ const CurrentRefinements = ({ currencyCode }: { currencyCode: string }) => {
 
   return (
     <div className="flex flex-col gap-y-3" data-testid="current-refinements">
-      <div className="flex items-center justify-between gap-x-2 pr-6">
+      <div className="flex items-center gap-x-2 pr-6">
         <span className="txt-compact-small-plus text-ui-fg-subtle">
           Applied filters
         </span>
-        {canClearAll && (
-          <button
-            onClick={clearAll}
-            className="txt-compact-small-plus text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
-            data-testid="clear-refinements"
-          >
-            Clear all
-          </button>
-        )}
       </div>
 
       <ul className="flex flex-wrap gap-2 pr-6">

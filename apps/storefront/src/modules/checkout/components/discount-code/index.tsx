@@ -12,10 +12,18 @@ import { SubmitButton } from "../submit-button"
 
 type DiscountCodeProps = {
   cart: HttpTypes.StoreCart
+  /**
+   * When true the code field starts open instead of hidden behind the
+   * "Add Promotion Code(s)" toggle. Checkout keeps the default (closed).
+   */
+  defaultOpen?: boolean
 }
 
-const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+const DiscountCode: React.FC<DiscountCodeProps> = ({
+  cart,
+  defaultOpen,
+}) => {
+  const [isOpen, setIsOpen] = React.useState(defaultOpen ?? false)
   const [errorMessage, setErrorMessage] = React.useState("")
 
   const { promotions = [] } = cart

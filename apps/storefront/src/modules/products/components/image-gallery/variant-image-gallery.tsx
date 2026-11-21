@@ -42,7 +42,15 @@ const VariantImageGallery = ({
     [product, variantId]
   )
 
-  return <ImageGallery images={images} />
+  // A product clip, when the merchant adds one as `video_url` in the
+  // product metadata in the admin, appears as the last gallery position.
+  // No video is shown when no clip exists.
+  const videoUrl =
+    typeof product.metadata?.video_url === "string"
+      ? product.metadata.video_url
+      : null
+
+  return <ImageGallery images={images} videoUrl={videoUrl} />
 }
 
 export default VariantImageGallery

@@ -1,13 +1,16 @@
 "use client"
 
 import { addToCart } from "@lib/data/cart"
+import { retrieveCustomer } from "@lib/data/customer"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { notifyCartUpdated } from "@lib/util/cart-events"
 import { isVariantInStock } from "@lib/util/inventory"
 import { HttpTypes } from "@medusajs/types"
-import { Button } from "@modules/common/components/ui"
+import { Button, clx } from "@modules/common/components/ui"
 import Divider from "@modules/common/components/divider"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
+import SizeGuide from "@modules/products/components/size-guide"
 import { isEqual } from "lodash"
 import { useParams, usePathname } from "next/navigation"
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react"
@@ -46,6 +49,19 @@ export default function ProductActions({
   )
   const [isUrlVariantApplied, setIsUrlVariantApplied] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
+  // Brief success state + toast after an item lands in the bag.
+  const [justAdded, setJustAdded] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const addedTimer = useRef<number | undefined>(undefined)
+  const toastTimer = useRef<number | undefined>(undefined)
+
+  // Clear the success timers if the component unmounts mid-animation.
+  useEffect(() => {
+    return () => {
+      clearTimeout(addedTimer.current)
+      clearTimeout(toastTimer.current)
+    }
+  }, [])
   const countryCode = useParams().countryCode as string
 
   const selectedVariant = useMemo(() => {
@@ -118,6 +134,23 @@ export default function ProductActions({
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) return null
 
+    // Don't double-add while an add or its success animation is running.
+    if (isAdding || justAdded) return null
+
+    // Sign-up gate: a visitor must have an account before adding anything
+    // to the bag. The product page is statically rendered, so the login
+    // state can't be baked in on the server — check it at click time.
+    const customer = await retrieveCustomer().catch(() => null)
+    if (!customer) {
+      const returnUrl = `${window.location.pathname}${window.location.search}`
+      router.push(
+        `/${countryCode}/account?view=register&next=${encodeURIComponent(
+          returnUrl
+        )}`
+      )
+      return null
+    }
+
     setIsAdding(true)
 
     await addToCart({
@@ -128,6 +161,14 @@ export default function ProductActions({
     notifyCartUpdated()
 
     setIsAdding(false)
+
+    // Success animation: brass button + toast, then back to normal.
+    setJustAdded(true)
+    setShowToast(true)
+    clearTimeout(addedTimer.current)
+    clearTimeout(toastTimer.current)
+    addedTimer.current = window.setTimeout(() => setJustAdded(false), 2000)
+    toastTimer.current = window.setTimeout(() => setShowToast(false), 4000)
   }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -171,6 +212,13 @@ export default function ProductActions({
                         data-testid="product-options"
                         disabled={!!disabled || isAdding}
                       />
+                      {option.title === "Size" && (
+                        <div className="flex justify-end mt-3">
+                          <SizeGuide
+                            categoryName={product.categories?.[0]?.name}
+                          />
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -200,17 +248,51 @@ export default function ProductActions({
               !isValidVariant
             }
             variant="primary"
-            className="w-full h-10"
+            className={clx(
+              "w-full h-10",
+              justAdded && "!bg-brass !text-ivory hover:!bg-brass-light"
+            )}
             isLoading={isAdding}
             data-testid="add-product-button"
           >
-            {!selectedVariant
+            {justAdded
+              ? "✓ Added to your bag"
+              : !selectedVariant
               ? "Select variant"
               : !inStock || !isValidVariant
               ? "Out of stock"
               : "Add to cart"}
           </Button>
         </form>
+        {showToast && (
+          <div
+            className="fixed bottom-24 small:bottom-8 left-4 right-4 small:left-auto small:right-8 z-50 animate-toast-in"
+            role="status"
+            data-testid="added-to-bag-toast"
+          >
+            <div className="flex items-center justify-between gap-4 bg-ivory border border-stone border-l-4 border-l-brass shadow-lg px-5 py-4">
+              <span className="font-display text-lg text-ink">
+                Added to your bag
+              </span>
+              <span className="flex items-center gap-4">
+                <LocalizedClientLink
+                  href="/cart"
+                  className="text-xs uppercase tracking-[0.2em] text-brass underline underline-offset-4 hover:text-ink"
+                >
+                  View bag
+                </LocalizedClientLink>
+                <button
+                  type="button"
+                  onClick={() => setShowToast(false)}
+                  aria-label="Dismiss"
+                  className="text-ink/60 hover:text-ink text-xl leading-none"
+                >
+                  ×
+                </button>
+              </span>
+            </div>
+          </div>
+        )}
         <MobileActions
           product={product}
           variant={selectedVariant}
