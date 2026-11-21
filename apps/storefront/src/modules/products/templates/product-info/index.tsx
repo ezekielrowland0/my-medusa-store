@@ -1,5 +1,6 @@
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@modules/common/components/ui"
+import ItemEmblem from "@modules/common/components/item-emblem"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 type ProductInfoProps = {
@@ -18,13 +19,16 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
             {product.collection.title}
           </LocalizedClientLink>
         )}
-        <Heading
-          level="h1"
-          className="text-3xl leading-10 text-ui-fg-base"
-          data-testid="product-title"
-        >
-          {product.title}
-        </Heading>
+        <div className="flex items-start gap-x-3">
+          <ItemEmblem size={30} className="mt-1 animate-pop-in" />
+          <Heading
+            level="h1"
+            className="text-3xl leading-10 text-ui-fg-base"
+            data-testid="product-title"
+          >
+            {product.title}
+          </Heading>
+        </div>
 
         <Text
           className="text-medium text-ui-fg-subtle whitespace-pre-line"

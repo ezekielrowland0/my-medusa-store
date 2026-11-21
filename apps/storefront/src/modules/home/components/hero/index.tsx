@@ -2,6 +2,8 @@ import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Heading } from "@modules/common/components/ui"
 
+const HEADLINE_WORDS = ["Everyday", "essentials,", "beautifully", "elevated"]
+
 const Hero = () => {
   return (
     <div className="relative h-[85vh] min-h-[540px] w-full overflow-hidden">
@@ -10,7 +12,7 @@ const Hero = () => {
         alt="A luxury fashion store interior in marble and brass"
         fill
         priority
-        className="object-cover object-center"
+        className="object-cover object-center animate-ken-burns"
       />
       <div className="absolute inset-0 bg-ink/55" />
       <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center px-6 gap-6">
@@ -21,7 +23,15 @@ const Hero = () => {
           level="h1"
           className="font-display text-5xl small:text-6xl leading-tight text-ivory font-medium max-w-3xl"
         >
-          Everyday essentials, beautifully elevated
+          {HEADLINE_WORDS.map((word, index) => (
+            <span
+              key={word}
+              className="animate-headline-word"
+              style={{ animationDelay: `${0.15 + index * 0.12}s` }}
+            >
+              {word}{" "}
+            </span>
+          ))}
         </Heading>
         <span className="block h-px w-16 bg-brass" />
         <p className="text-base-regular text-ivory/80 max-w-xl">
@@ -33,6 +43,14 @@ const Hero = () => {
         >
           Shop the collection
         </LocalizedClientLink>
+      </div>
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-ivory/70">
+          Scroll
+        </span>
+        <span className="relative block h-10 w-px bg-ivory/40 overflow-hidden">
+          <span className="absolute inset-x-0 top-0 h-3 bg-brass animate-scroll-cue" />
+        </span>
       </div>
     </div>
   )

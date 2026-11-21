@@ -2,6 +2,7 @@ import { Metadata } from "next"
 
 import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
+import HomeEditorial from "@modules/home/components/home-editorial"
 import { listCollections } from "@lib/data/collections"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { toJsonLd } from "@lib/util/product-structured-data"
@@ -89,6 +90,7 @@ export default async function Home(props: {
         dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
       />
       <Hero />
+      <HomeEditorial />
       <div className="py-12">
         <ul className="flex flex-col gap-x-6">
           <FeaturedProducts collections={collections} region={region} />

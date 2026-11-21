@@ -8,7 +8,12 @@ import { convertToLocale } from "@lib/util/money"
 import { notifyCartUpdated } from "@lib/util/cart-events"
 import { HttpTypes } from "@medusajs/types"
 import { Button, clx } from "@modules/common/components/ui"
+import ItemEmblem from "@modules/common/components/item-emblem"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Mannequin, {
+  garmentKindFor,
+  type WornGarment,
+} from "@modules/products/components/mannequin"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import Thumbnail from "@modules/products/components/thumbnail"
 import { isEqual } from "lodash"
@@ -75,6 +80,29 @@ const variantDescription = (variant?: HttpTypes.StoreProductVariant) =>
     .map((o) => o.value)
     .filter(Boolean)
     .join(" / ")
+
+const optionValueByTitle = (selection: SlotSelection, title: string) => {
+  const option = selection.product.options?.find(
+    (o) => o.title?.toLowerCase() === title.toLowerCase()
+  )
+  return option ? selection.options[option.id] : undefined
+}
+
+// The garment this slot's chosen piece becomes on the mannequin, or null
+// when the slot is empty or the piece is not a top or a bottom.
+const garmentForSelection = (
+  selection: SlotSelection | null,
+  slot: "top" | "bottom"
+): WornGarment | null => {
+  if (!selection) return null
+  const kind = garmentKindFor(selection.product)
+  if (!kind) return null
+  if (slot === "top" && kind !== "tshirt" && kind !== "sweatshirt")
+    return null
+  if (slot === "bottom" && kind !== "sweatpants" && kind !== "shorts")
+    return null
+  return { kind, color: optionValueByTitle(selection, "Color") ?? "" }
+}
 
 type SlotCardProps = {
   slot: SlotKind
@@ -175,8 +203,11 @@ const SlotCard = ({
             <span className="block text-xs uppercase tracking-[0.2em] text-brass mb-1">
               {label}
             </span>
-            <span className="font-display text-xl text-ink">
-              {product.title}
+            <span className="flex items-center gap-x-2">
+              <ItemEmblem size={22} />
+              <span className="font-display text-xl text-ink">
+                {product.title}
+              </span>
             </span>
             {description && (
               <span className="block text-sm text-ui-fg-subtle mt-1">
@@ -292,6 +323,21 @@ export default function OutfitBuilder({
     (slot) => productsBySlot[slot].length === 0
   )
 
+  // The mannequin wears the whole chosen look: top + bottom together.
+  const lookTop = garmentForSelection(selections.top, "top")
+  const lookBottom = garmentForSelection(selections.bottom, "bottom")
+  const lookLabel =
+    selectedPieces.length === 0
+      ? "Pick pieces below to dress the mannequin"
+      : `Wearing: ${selectedPieces
+          .map(
+            ({ selection }) =>
+              `${selection.product.title} (${variantDescription(
+                getSelectedVariant(selection)
+              )})`
+          )
+          .join(", ")}`
+
   const selectProduct = (slot: SlotKind, product: HttpTypes.StoreProduct) => {
     setAddResult(null)
     setJustAdded(false)
@@ -392,6 +438,37 @@ export default function OutfitBuilder({
         </p>
       </div>
 
+      {/* The mannequin wears the whole look as you build it. */}
+      <div
+        className="mb-10 border border-stone bg-white/50 px-6 py-8 flex flex-col small:flex-row items-center gap-8"
+        data-testid="outfit-mannequin"
+      >
+        <div
+          key={`${selections.top?.product.id ?? "none"}-${selections.bottom?.product.id ?? "none"}`}
+          className="animate-pop-in shrink-0"
+        >
+          <Mannequin top={lookTop} bottom={lookBottom} label={lookLabel} />
+        </div>
+        <div className="text-center small:text-left">
+          <span className="text-xs uppercase tracking-[0.25em] text-brass">
+            Your look
+          </span>
+          <p className="font-display text-3xl text-ink mt-2">
+            {selectedPieces.length === 0
+              ? "Start with a top and a bottom"
+              : `${selectedPieces.length} piece${
+                  selectedPieces.length > 1 ? "s" : ""
+                } in your look`}
+          </p>
+          <p className="font-display text-2xl text-brass mt-2">
+            Total: {totalLabel}
+          </p>
+          <p className="text-sm text-ui-fg-subtle mt-3">
+            Pick pieces below — the mannequin wears them as you choose.
+          </p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 small:grid-cols-2 medium:grid-cols-4 gap-6">
         {SLOT_ORDER.map((slot) => (
           <SlotCard
@@ -434,7 +511,7 @@ export default function OutfitBuilder({
             disabled={selectedPieces.length === 0 || isAdding}
             isLoading={isAdding}
             className={clx(
-              "w-full small:w-auto h-12 px-8",
+              "w-full small:w-auto h-12 px-8 btn-shine",
               justAdded && "!bg-brass !text-ivory hover:!bg-brass-light"
             )}
             data-testid="add-look-button"

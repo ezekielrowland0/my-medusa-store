@@ -8,7 +8,12 @@ import { isVariantInStock } from "@lib/util/inventory"
 import { HttpTypes } from "@medusajs/types"
 import { Button, clx } from "@modules/common/components/ui"
 import Divider from "@modules/common/components/divider"
+import ItemEmblem from "@modules/common/components/item-emblem"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Mannequin, {
+  garmentKindFor,
+  type WornGarment,
+} from "@modules/products/components/mannequin"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import SizeGuide from "@modules/products/components/size-guide"
 import { isEqual } from "lodash"
@@ -125,6 +130,29 @@ export default function ProductActions({
     () => isVariantInStock(selectedVariant),
     [selectedVariant]
   )
+
+  // What the mannequin wears: the chosen size and colour, live.
+  const optionValueByTitle = (title: string) => {
+    const option = product.options?.find(
+      (o) => o.title?.toLowerCase() === title.toLowerCase()
+    )
+    return option ? options[option.id] : undefined
+  }
+
+  const selectedSize = optionValueByTitle("Size")
+  const selectedColor = optionValueByTitle("Color")
+  const garmentKind = garmentKindFor(product)
+  const wornTop: WornGarment | null =
+    garmentKind === "tshirt" || garmentKind === "sweatshirt"
+      ? { kind: garmentKind, color: selectedColor ?? "" }
+      : null
+  const wornBottom: WornGarment | null =
+    garmentKind === "sweatpants" || garmentKind === "shorts"
+      ? { kind: garmentKind, color: selectedColor ?? "" }
+      : null
+  const wearingLabel = `Wearing: ${product.title}${
+    selectedSize ? ` — Size ${selectedSize}` : ""
+  }${selectedColor ? `, ${selectedColor}` : ""}`
 
   const actionsRef = useRef<HTMLDivElement>(null)
 
@@ -249,7 +277,7 @@ export default function ProductActions({
             }
             variant="primary"
             className={clx(
-              "w-full h-10",
+              "w-full h-10 btn-shine",
               justAdded && "!bg-brass !text-ivory hover:!bg-brass-light"
             )}
             isLoading={isAdding}
@@ -264,6 +292,31 @@ export default function ProductActions({
               : "Add to cart"}
           </Button>
         </form>
+        {/* See it worn — the mannequin wears the piece as you pick it. */}
+        <div
+          className="mt-6 border border-stone bg-white/50 px-4 py-6"
+          data-testid="see-it-worn"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-[0.25em] text-brass">
+              See it worn
+            </span>
+            <ItemEmblem size={24} />
+          </div>
+          <div
+            key={selectedVariant?.id ?? product.id}
+            className="animate-pop-in mt-4"
+          >
+            <Mannequin
+              top={wornTop}
+              bottom={wornBottom}
+              label={wearingLabel}
+            />
+          </div>
+          <p className="text-xs text-ui-fg-subtle text-center mt-3">
+            Pick a size and colour — the mannequin updates as you choose.
+          </p>
+        </div>
         {showToast && (
           <div
             className="fixed bottom-24 small:bottom-8 left-4 right-4 small:left-auto small:right-8 z-50 animate-toast-in"

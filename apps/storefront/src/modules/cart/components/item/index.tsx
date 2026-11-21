@@ -6,6 +6,7 @@ import { HttpTypes } from "@medusajs/types"
 import CartItemSelect from "@modules/cart/components/cart-item-select"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import DeleteButton from "@modules/common/components/delete-button"
+import ItemEmblem from "@modules/common/components/item-emblem"
 import LineItemPrice from "@modules/common/components/line-item-price"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -155,12 +156,15 @@ const Item = ({
       </Table.Cell>
 
       <Table.Cell className="text-left">
-        <Text
-          className="txt-medium-plus text-ui-fg-base"
-          data-testid="product-title"
-        >
-          {item.product_title}
-        </Text>
+        <span className="flex items-center gap-x-2">
+          <ItemEmblem size={20} />
+          <Text
+            className="txt-medium-plus text-ui-fg-base"
+            data-testid="product-title"
+          >
+            {item.product_title}
+          </Text>
+        </span>
         <div
           className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1"
           data-testid="product-variant"
