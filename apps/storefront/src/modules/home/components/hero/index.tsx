@@ -1,3 +1,4 @@
+import { Fragment } from "react"
 import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Heading } from "@modules/common/components/ui"
@@ -24,13 +25,15 @@ const Hero = () => {
           className="font-display text-5xl small:text-6xl leading-tight text-ivory font-medium max-w-3xl"
         >
           {HEADLINE_WORDS.map((word, index) => (
-            <span
-              key={word}
-              className="animate-headline-word"
-              style={{ animationDelay: `${0.15 + index * 0.12}s` }}
-            >
-              {word}{" "}
-            </span>
+            <Fragment key={word}>
+              <span
+                className="animate-headline-word"
+                style={{ animationDelay: `${0.15 + index * 0.12}s` }}
+              >
+                {word}
+              </span>
+              {index < HEADLINE_WORDS.length - 1 ? " " : ""}
+            </Fragment>
           ))}
         </Heading>
         <span className="block h-px w-16 bg-brass" />
