@@ -2,6 +2,24 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+@layer base {
+  body {
+    @apply bg-ivory font-sans text-ink antialiased;
+  }
+
+  ::selection {
+    background-color: #a67c37;
+    color: #faf7f2;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    letter-spacing: 0.01em;
+  }
+}
+
 @layer utilities {
   /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
@@ -55,7 +73,7 @@
   }
 
   .contrast-btn {
-    @apply px-4 py-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors duration-200 ease-in;
+    @apply px-8 py-3.5 border border-ink bg-ink text-ivory uppercase tracking-[0.2em] text-xs font-medium transition-colors duration-300 ease-in hover:bg-brass hover:border-brass hover:text-ink;
   }
 
   .text-xsmall-regular {

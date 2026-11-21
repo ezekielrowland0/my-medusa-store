@@ -20,6 +20,15 @@ module.exports = {
         padding: "padding-top padding-right padding-bottom padding-left",
       },
       colors: {
+        ivory: "#FAF7F2",
+        ink: "#1C1A17",
+        brass: {
+          DEFAULT: "#A67C37",
+          light: "#B08D57",
+        },
+        stone: {
+          DEFAULT: "#E7E0D4",
+        },
         grey: {
           0: "#FFFFFF",
           5: "#F9FAFB",
@@ -58,7 +67,15 @@ module.exports = {
         "3xl": "2rem",
       },
       fontFamily: {
+        display: [
+          "var(--font-display)",
+          "Cormorant Garamond",
+          "Georgia",
+          "serif",
+        ],
         sans: [
+          "var(--font-sans)",
+          "Jost",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
