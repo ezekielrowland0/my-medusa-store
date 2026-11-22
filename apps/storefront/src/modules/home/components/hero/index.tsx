@@ -1,9 +1,6 @@
-import { Fragment } from "react"
 import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Heading } from "@modules/common/components/ui"
-
-const HEADLINE_WORDS = ["Everyday", "essentials,", "beautifully", "elevated"]
 
 const Hero = () => {
   return (
@@ -24,17 +21,7 @@ const Hero = () => {
           level="h1"
           className="font-display text-5xl small:text-6xl leading-tight text-ivory font-medium max-w-3xl"
         >
-          {HEADLINE_WORDS.map((word, index) => (
-            <Fragment key={word}>
-              <span
-                className="animate-headline-word"
-                style={{ animationDelay: `${index * 0.08}s` }}
-              >
-                {word}
-              </span>
-              {index < HEADLINE_WORDS.length - 1 ? " " : ""}
-            </Fragment>
-          ))}
+          Everyday essentials, beautifully elevated
         </Heading>
         <span className="block h-px w-16 bg-brass" />
         <p className="text-base-regular text-ivory/80 max-w-xl">
