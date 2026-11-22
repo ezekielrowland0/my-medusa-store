@@ -117,17 +117,18 @@
   @keyframes headline-word {
     from {
       opacity: 0;
-      transform: translateY(18px);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
     }
   }
 
   .animate-headline-word {
-    display: inline-block;
-    animation: headline-word 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+    /* Inline, not inline-block: the spaces between the word spans stay
+       real spaces in the text, so copying the headline keeps them, and
+       the fade is opacity-only so it reads fast. */
+    display: inline;
+    animation: headline-word 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   /* Brand marquee strip */

@@ -3,7 +3,7 @@
 import { HttpTypes } from "@medusajs/types"
 import { clx } from "@modules/common/components/ui"
 import Image from "next/image"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { displayImageUrl } from "@lib/util/product-image-colour"
 
 const MAX_IMAGES = 6
@@ -113,6 +113,22 @@ const ImageGallery = ({ images, videoUrl }: ImageGalleryProps) => {
   })
 
   const activeItem = items[Math.min(activeIndex, items.length - 1)]
+
+  // Preload every gallery photo up front, so switching photos (or
+  // colours, which swaps the whole set) never leaves a blank box
+  // while a remote photo downloads.
+  useEffect(() => {
+    items.forEach((item) => {
+      if (item.kind === "image") {
+        // window.Image: the file also imports Next's Image component,
+        // which shadows the DOM Image constructor.
+        const img = new window.Image()
+        img.src = item.url
+      }
+    })
+    // Preload once per photo set, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.map((item) => item.url).join("|")])
 
   const resetZoom = () => {
     setScale(1)
@@ -273,12 +289,22 @@ const ImageGallery = ({ images, videoUrl }: ImageGalleryProps) => {
       x: ((event.clientX - rect.left) / rect.width) * 100,
       y: ((event.clientY - rect.top) / rect.height) * 100,
     })
-    if (!hoverZoom) {
-      if (hoverTimer.current) {
-        clearTimeout(hoverTimer.current)
-      }
-      hoverTimer.current = setTimeout(() => setHoverZoom(true), 350)
+  }
+
+  // The zoom timer starts once, when the mouse enters the photo. It used
+  // to restart on every mouse move, so any tiny movement of the mouse
+  // kept pushing the zoom back and it never fired at all.
+  const handleMouseEnter = () => {
+    if (isTouchDevice.current || activeItem?.kind !== "image") {
+      return
     }
+    if (!window.matchMedia("(pointer: fine)").matches) {
+      return
+    }
+    if (hoverZoom || hoverTimer.current) {
+      return
+    }
+    hoverTimer.current = setTimeout(() => setHoverZoom(true), 350)
   }
 
   const handleMouseLeave = () => {
@@ -317,6 +343,7 @@ const ImageGallery = ({ images, videoUrl }: ImageGalleryProps) => {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           onMouseMove={handleMouseMove}
+          onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
           {activeItem.kind === "image" ? (

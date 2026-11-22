@@ -1,6 +1,7 @@
 "use client"
 
 import { HttpTypes } from "@medusajs/types"
+import { displayImageUrl } from "@lib/util/product-image-colour"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import ImageGallery from "."
@@ -68,6 +69,20 @@ const VariantImageGallery = ({
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => setIsMounted(true), [])
+
+  // Preload every photo of this product — both colours — as soon as the
+  // page loads, so picking another colour never leaves a blank box
+  // while its photos download for the first time.
+  useEffect(() => {
+    ;(product.images ?? []).forEach((image) => {
+      const url = displayImageUrl(image.url)
+      if (url) {
+        const img = new Image()
+        img.src = url
+      }
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const variantId = isMounted ? searchParams.get("v_id") ?? undefined : undefined
   const images = useMemo(

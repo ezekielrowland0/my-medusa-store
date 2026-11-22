@@ -83,16 +83,16 @@ export default function Mannequin({
   return (
     <div className={className}>
       <svg
-        viewBox="0 0 220 460"
+        viewBox="0 0 220 400"
         role="img"
         aria-label={label ?? "Mannequin"}
         className="w-full max-w-[220px] mx-auto"
       >
         {/* Soft shadow and plinth */}
-        <ellipse cx="110" cy="440" rx="62" ry="9" fill={INK} opacity="0.08" />
+        <ellipse cx="110" cy="380" rx="62" ry="9" fill={INK} opacity="0.08" />
         <rect
           x="55"
-          y="430"
+          y="370"
           width="110"
           height="7"
           rx="3"
@@ -103,8 +103,8 @@ export default function Mannequin({
         {/* Faint brass ring behind the figure */}
         <circle
           cx="110"
-          cy="225"
-          r="100"
+          cy="195"
+          r="95"
           fill="none"
           stroke="#A67C37"
           strokeWidth="1"
@@ -152,19 +152,19 @@ export default function Mannequin({
         <circle cx="69" cy="197" r="6" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
         <circle cx="151" cy="197" r="6" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
         <path
-          d="M94 210 L90 310 L88 420 L103 420 L105 310 L107 210 Z"
+          d="M94 210 L90 285 L88 360 L103 360 L105 285 L107 210 Z"
           fill={FIGURE_FILL}
           stroke={INK}
           strokeWidth="1.2"
         />
         <path
-          d="M113 210 L115 310 L117 420 L132 420 L130 310 L126 210 Z"
+          d="M113 210 L115 285 L117 360 L132 360 L130 285 L126 210 Z"
           fill={FIGURE_FILL}
           stroke={INK}
           strokeWidth="1.2"
         />
-        <ellipse cx="95" cy="424" rx="10" ry="4.5" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
-        <ellipse cx="125" cy="424" rx="10" ry="4.5" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
+        <ellipse cx="95" cy="364" rx="10" ry="4.5" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
+        <ellipse cx="125" cy="364" rx="10" ry="4.5" fill={FIGURE_FILL} stroke={INK} strokeWidth="1.2" />
 
         {/* Top garment */}
         {top?.kind === "tshirt" && (
@@ -225,14 +225,14 @@ export default function Mannequin({
         {bottom?.kind === "sweatpants" && (
           <g>
             <path
-              d="M87 209 L85 310 L84 418 L100 418 L103 310 L106 209 Z"
+              d="M87 209 L85 285 L84 358 L100 358 L103 285 L106 209 Z"
               fill={bottomFill}
               stroke={INK}
               strokeWidth="1.2"
               className="mannequin-garment"
             />
             <path
-              d="M114 209 L117 310 L120 418 L136 418 L135 310 L133 209 Z"
+              d="M114 209 L117 285 L120 358 L136 358 L135 285 L133 209 Z"
               fill={bottomFill}
               stroke={INK}
               strokeWidth="1.2"
